@@ -15,8 +15,8 @@ function Login({ onLogin }) {
     
     // Decide a qué ruta llamar según el modo
     const endpoint = isLogin 
-      ? 'http://localhost:5000/api/login' 
-      : 'http://localhost:5000/api/register';
+      ? 'https://remake-6kfb.onrender.com/api/login' 
+      : 'https://remake-6kfb.onrender.com/api/register';
     
     try {
       const res = await axios.post(endpoint, formData);
@@ -95,11 +95,11 @@ function Catalog({ userId }) {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/products').then(res => setProducts(res.data));
+    axios.get('https://remake-6kfb.onrender.com/api/products').then(res => setProducts(res.data));
   }, []);
 
   const handleBuy = async (productId) => {
-    await axios.post('http://localhost:5000/api/purchase-intent', { productId, userId });
+    await axios.post('https://remake-6kfb.onrender.com/api/purchase-intent', { productId, userId });
     alert("✅ ¡Gracias! Registramos tu interés. Te contactaremos cuando esté disponible.");
   };
 
@@ -132,7 +132,7 @@ function Publish({ userId }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await axios.post('http://localhost:5000/api/products', { ...form, seller: userId });
+    await axios.post('https://remake-6kfb.onrender.com/api/products', { ...form, seller: userId });
     alert("¡Prenda publicada con éxito!");
     navigate('/'); 
   };
@@ -160,19 +160,19 @@ function SocialFeed({ userId }) {
   }, []);
 
   const loadPosts = () => {
-    axios.get('http://localhost:5000/api/posts').then(res => setPosts(res.data));
+    axios.get('https://remake-6kfb.onrender.com/api/posts').then(res => setPosts(res.data));
   };
 
   const handlePost = async (e) => {
     e.preventDefault();
     if(!newPost) return;
-    await axios.post('http://localhost:5000/api/posts', { text: newPost, author: userId });
+    await axios.post('https://remake-6kfb.onrender.com/api/posts', { text: newPost, author: userId });
     setNewPost("");
     loadPosts(); 
   };
 
   const handleLike = async (postId) => {
-    await axios.put(`http://localhost:5000/api/posts/${postId}/like`);
+    await axios.put(`https://remake-6kfb.onrender.com/api/posts/${postId}/like`);
     loadPosts(); 
   };
 
