@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import './App.css'; 
+import './App.css'; // Importamos el nuevo diseño
 
-// const API_URL = 'http://localhost:5000/api'; // LOCAL
-const API_URL = 'https://remake-6kfb.onrender.com/api'; // RENDER (Producción)
+// CONFIGURACIÓN API (Ajustar según entorno)
+// const API_URL = 'http://localhost:5000/api'; 
+const API_URL = 'https://remake-6kfb.onrender.com/api'; 
 
-// --- 1. PANTALLA DE LOGIN / REGISTRO ---
+// --- 1. LOGIN / REGISTRO ---
 function Login({ onLogin }) {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ email: '', password: '', username: '', role: 'comprador' });
@@ -24,54 +25,55 @@ function Login({ onLogin }) {
       const userRole = res.data.role || formData.role; 
       onLogin(res.data.userId, userRole, res.data.username);
     } catch (err) {
-      setError(err.response?.data?.error || 'Error al conectar con el servidor');
+      setError(err.response?.data?.error || 'Error de conexión');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>RopaApp 👖</h1>
-        <h2 style={styles.subtitle}>{isLogin ? '¡Hola de nuevo!' : 'Crea tu cuenta'}</h2>
+    <div className="app-container" style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+      <div className="card" style={{width: '90%'}}>
+        <div className="text-center">
+          <h1 style={{color: 'var(--primary)', fontSize: '2.5rem'}}>CycloArt</h1>
+          <p className="text-muted">{isLogin ? 'Bienvenido de nuevo' : 'Únete al movimiento'}</p>
+        </div>
         
-        {error && <div style={styles.error}>{error}</div>}
+        {error && <div style={{background: '#ff7675', color: 'white', padding: '10px', borderRadius: '8px', marginBottom: '15px'}}>{error}</div>}
 
-        <form onSubmit={handleSubmit} style={styles.form}>
+        <form onSubmit={handleSubmit} className="form-group">
           {!isLogin && (
-            <input style={styles.input} placeholder="Nombre de usuario" onChange={e => setFormData({...formData, username: e.target.value})} required />
+            <input className="input-field" placeholder="Nombre de usuario" onChange={e => setFormData({...formData, username: e.target.value})} required />
           )}
-          <input style={styles.input} placeholder="Correo electrónico" type="email" onChange={e => setFormData({...formData, email: e.target.value})} required />
-          <input style={styles.input} placeholder="Contraseña" type="password" onChange={e => setFormData({...formData, password: e.target.value})} required />
+          <input placeholder="Correo electrónico" type="email" onChange={e => setFormData({...formData, email: e.target.value})} required />
+          <input placeholder="Contraseña" type="password" onChange={e => setFormData({...formData, password: e.target.value})} required />
           
           {!isLogin && (
-            <div style={styles.selectContainer}>
-              <label style={styles.label}>Quiero usar la app para:</label>
-              <select style={styles.select} onChange={e => setFormData({...formData, role: e.target.value})}>
-                <option value="comprador">Comprar Ropa</option>
-                <option value="vendedor">Vender Ropa</option>
-              </select>
-            </div>
+            <select onChange={e => setFormData({...formData, role: e.target.value})}>
+              <option value="comprador">Quiero Comprar</option>
+              <option value="vendedor">Quiero Vender</option>
+            </select>
           )}
 
-          <button type="submit" style={styles.button} disabled={loading}>
-            {loading ? 'Cargando...' : (isLogin ? 'Entrar' : 'Registrarme')}
+          <button type="submit" className="btn btn-primary" disabled={loading}>
+            {loading ? 'Procesando...' : (isLogin ? 'Iniciar Sesión' : 'Crear Cuenta')}
           </button>
         </form>
 
-        <p style={styles.toggleText}>
-          {isLogin ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
-          <span onClick={() => setIsLogin(!isLogin)} style={styles.link}>
-            {isLogin ? "Regístrate aquí" : "Inicia Sesión"}
-          </span>
-        </p>
+        <div className="text-center" style={{marginTop: '20px'}}>
+          <p className="text-muted">
+            {isLogin ? "¿Nuevo aquí? " : "¿Ya tienes cuenta? "}
+            <button onClick={() => setIsLogin(!isLogin)} className="btn-link">
+              {isLogin ? "Regístrate" : "Ingresa"}
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );
 }
 
-// --- 2. CATÁLOGO (HOME) ---
+// --- 2. CATÁLOGO ---
 function Catalog({ userId }) {
   const [products, setProducts] = useState([]);
 
@@ -81,21 +83,20 @@ function Catalog({ userId }) {
 
   const handleBuy = async (productId) => {
     await axios.post(`${API_URL}/purchase-intent`, { productId, userId });
-    alert("✅ ¡Gracias! Registramos tu interés.");
+    alert("✨ ¡Excelente elección! Hemos notificado al vendedor.");
   };
 
   return (
-    <div style={{ padding: '10px 10px 80px 10px' }}>
-      <h2>Catálogo</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+    <div className="content-wrap">
+      <h2>Descubrir</h2>
+      <div className="grid-2">
         {products.map(p => (
-          <div key={p._id} style={{ border: '1px solid #eee', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}>
-            <img src={p.imageUrl} alt={p.title} style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
-            <div style={{ padding: '10px' }}>
-              <h4 style={{ margin: '0 0 5px 0' }}>{p.title}</h4>
-              <p style={{ margin: '0 0 10px 0', color: '#666' }}>${p.price}</p>
-              <small>Vendedor: {p.seller?.username || 'Anónimo'}</small>
-              <button onClick={() => handleBuy(p._id)} style={{ width: '100%', marginTop: '10px', background: '#007bff', color: 'white', border: 'none', padding: '8px', borderRadius: '5px' }}>
+          <div key={p._id} className="card product-card">
+            <img src={p.imageUrl} alt={p.title} />
+            <div className="card-content">
+              <h4>{p.title}</h4>
+              <p style={{fontWeight: 'bold', color: 'var(--primary)'}}>${p.price}</p>
+              <button onClick={() => handleBuy(p._id)} className="btn btn-primary" style={{padding: '8px', fontSize: '14px'}}>
                 Lo quiero
               </button>
             </div>
@@ -106,261 +107,202 @@ function Catalog({ userId }) {
   );
 }
 
-// --- 3. PUBLICAR PRENDA (CON FOTO) ---
+// --- 3. PUBLICAR PRENDA ---
 function Publish({ userId }) {
-  const [form, setForm] = useState({ title: '', price: '', description: '' });
-  const [imageFile, setImageFile] = useState(null); // Guardamos el archivo
+  const [form, setForm] = useState({ title: '', price: '' });
+  const [imageFile, setImageFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!imageFile) return alert("¡Debes subir una foto!");
+    if (!imageFile) return alert("Por favor sube una foto de la prenda");
     
     setUploading(true);
     try {
-      // 1. Subir imagen primero
       const formData = new FormData();
       formData.append('image', imageFile);
       
       const uploadRes = await axios.post(`${API_URL}/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      const imageUrl = uploadRes.data.url;
 
-      // 2. Guardar producto con la URL
       await axios.post(`${API_URL}/products`, { 
-        ...form, 
-        imageUrl, 
-        seller: userId 
+        ...form, imageUrl: uploadRes.data.url, seller: userId 
       });
       
-      alert("¡Prenda publicada con éxito!");
+      alert("¡Publicado exitosamente!");
       navigate('/'); 
     } catch (error) {
       console.error(error);
-      alert("Error al publicar");
+      alert("Error al subir");
     } finally {
       setUploading(false);
     }
   };
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div className="content-wrap">
       <h2>Vender Prenda</h2>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <input placeholder="Título" onChange={e => setForm({...form, title: e.target.value})} required style={styles.input}/>
-        <input placeholder="Precio ($)" type="number" onChange={e => setForm({...form, price: e.target.value})} required style={styles.input}/>
-        
-        {/* INPUT DE ARCHIVO */}
-        <div style={{border: '2px dashed #ccc', padding: '20px', textAlign: 'center'}}>
-          <label style={{cursor: 'pointer', display: 'block'}}>
-            {imageFile ? `📸 ${imageFile.name}` : "Toca para subir foto"}
-            <input 
-              type="file" 
-              accept="image/*" 
-              style={{display: 'none'}} 
-              onChange={e => setImageFile(e.target.files[0])}
-            />
-          </label>
-        </div>
+      <form onSubmit={handleSubmit} className="form-group card">
+        <label className="file-upload-box">
+          {imageFile ? 
+            <span style={{color: 'var(--success)'}}>📸 {imageFile.name}</span> : 
+            <span>📂 Toca para subir foto</span>
+          }
+          <input type="file" accept="image/*" style={{display: 'none'}} onChange={e => setImageFile(e.target.files[0])}/>
+        </label>
 
-        <button type="submit" style={{...styles.button, background: 'green'}} disabled={uploading}>
-          {uploading ? 'Subiendo foto...' : 'PUBLICAR'}
+        <input placeholder="Nombre de la prenda" onChange={e => setForm({...form, title: e.target.value})} required />
+        <input placeholder="Precio ($)" type="number" onChange={e => setForm({...form, price: e.target.value})} required />
+        
+        <button type="submit" className="btn btn-primary" disabled={uploading}>
+          {uploading ? 'Subiendo...' : 'Publicar Ahora'}
         </button>
       </form>
     </div>
   );
 }
 
-// --- 4. MURO SOCIAL (CON FOTO OPCIONAL) ---
+// --- 4. COMUNIDAD ---
 function SocialFeed({ userId }) {
   const [posts, setPosts] = useState([]);
   const [newPostText, setNewPostText] = useState("");
   const [postImage, setPostImage] = useState(null);
-  const [loadingPost, setLoadingPost] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    loadPosts();
-  }, []);
+  useEffect(() => { loadPosts(); }, []);
 
-  const loadPosts = () => {
-    axios.get(`${API_URL}/posts`).then(res => setPosts(res.data));
-  };
+  const loadPosts = () => { axios.get(`${API_URL}/posts`).then(res => setPosts(res.data)); };
 
   const handlePost = async () => {
     if (!newPostText) return;
-    setLoadingPost(true);
-
+    setLoading(true);
     try {
       let imageUrl = null;
-      // Si seleccionó foto, la subimos
       if (postImage) {
         const formData = new FormData();
         formData.append('image', postImage);
-        const uploadRes = await axios.post(`${API_URL}/upload`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        imageUrl = uploadRes.data.url;
+        const res = await axios.post(`${API_URL}/upload`, formData, { headers: { 'Content-Type': 'multipart/form-data' }});
+        imageUrl = res.data.url;
       }
-
-      // Creamos el post
-      await axios.post(`${API_URL}/posts`, { 
-        text: newPostText, 
-        author: userId,
-        imageUrl: imageUrl // Puede ser null o la url
-      });
-
-      setNewPostText("");
-      setPostImage(null);
-      loadPosts(); 
-    } catch (error) {
-      alert("Error al publicar");
-    } finally {
-      setLoadingPost(false);
-    }
+      await axios.post(`${API_URL}/posts`, { text: newPostText, author: userId, imageUrl });
+      setNewPostText(""); setPostImage(null); loadPosts();
+    } catch(e) { alert("Error al publicar"); } finally { setLoading(false); }
   };
 
   const handleLike = async (postId) => {
     await axios.put(`${API_URL}/posts/${postId}/like`);
-    loadPosts(); 
+    loadPosts();
   };
 
   return (
-    <div style={{ padding: '10px 10px 80px 10px' }}>
+    <div className="content-wrap">
       <h2>Comunidad</h2>
       
-      {/* Crear Publicación */}
-      <div style={{ marginBottom: '20px', padding: '15px', background: '#f9f9f9', borderRadius: '10px', border: '1px solid #eee' }}>
+      {/* Crear Post */}
+      <div className="card">
         <textarea 
-          placeholder="¿Qué estás pensando?" 
+          placeholder="Comparte tu estilo..." 
           value={newPostText}
           onChange={e => setNewPostText(e.target.value)}
-          style={{ width: '100%', height: '60px', padding: '10px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '5px' }}
+          rows="2"
         />
-        
-        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-           {/* Botón Foto Pequeño */}
-           <label style={{cursor: 'pointer', color: '#007bff', fontSize: '14px'}}>
-              {postImage ? '✅ Foto lista' : '📷 Agregar foto'}
+        <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '10px'}}>
+           <label style={{cursor: 'pointer', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '5px'}}>
+              <span>📷</span>
+              {postImage ? 'Foto lista' : 'Agregar foto'}
               <input type="file" accept="image/*" style={{display: 'none'}} onChange={e => setPostImage(e.target.files[0])}/>
            </label>
-
-           <button onClick={handlePost} disabled={loadingPost} style={{ background: 'black', color: 'white', padding: '8px 20px', border: 'none', borderRadius: '20px' }}>
-             {loadingPost ? '...' : 'Publicar'}
+           <button onClick={handlePost} className="btn btn-primary" style={{width: 'auto', padding: '8px 20px'}}>
+             {loading ? '...' : 'Publicar'}
            </button>
         </div>
       </div>
 
-      {/* Lista de Posts */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        {posts.map(post => (
-          <div key={post._id} style={{ border: '1px solid #eee', padding: '15px', borderRadius: '10px', background: 'white' }}>
-            <div style={{fontWeight: 'bold', marginBottom: '5px'}}>@{post.author?.username || 'Usuario'}</div>
-            <p style={{ margin: '5px 0' }}>{post.text}</p>
-            
-            {/* Si tiene imagen, la mostramos */}
-            {post.imageUrl && (
-                <img src={post.imageUrl} alt="post" style={{width: '100%', borderRadius: '10px', marginTop: '10px', maxHeight: '300px', objectFit: 'cover'}}/>
-            )}
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#888', marginTop: '10px' }}>
-              <button onClick={() => handleLike(post._id)} style={{ background: 'none', border: '1px solid #ddd', borderRadius: '20px', padding: '5px 10px', cursor: 'pointer' }}>
-                ❤️ {post.likes}
-              </button>
-              <small>{new Date(post.createdAt).toLocaleDateString()}</small>
-            </div>
+      {/* Feed */}
+      {posts.map(post => (
+        <div key={post._id} className="card post-card">
+          <div className="card-content" style={{paddingBottom: 0}}>
+            <strong>@{post.author?.username || 'Usuario'}</strong>
+            <p style={{marginTop: '5px'}}>{post.text}</p>
           </div>
-        ))}
-      </div>
+          {post.imageUrl && <img src={post.imageUrl} alt="post" />}
+          <div className="card-content" style={{display: 'flex', gap: '15px'}}>
+            <button onClick={() => handleLike(post._id)} className="btn-link">❤️ {post.likes}</button>
+            <span className="text-muted">{new Date(post.createdAt).toLocaleDateString()}</span>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
 
-// --- 5. COMPONENTE DE PERFIL Y LOGOUT ---
+// --- 5. PERFIL ---
 function Profile({ user, onLogout }) {
-    return (
-        <div style={{padding: '20px', textAlign: 'center'}}>
-            <h2>Mi Perfil</h2>
-            <div style={{width: '80px', height: '80px', background: '#ddd', borderRadius: '50%', margin: '0 auto 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '30px'}}>
-                👤
-            </div>
-            <h3>@{user.username}</h3>
-            <p>Rol: {user.role.toUpperCase()}</p>
-            <br/>
-            <button onClick={onLogout} style={{background: 'red', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '5px', fontSize: '16px'}}>
-                Cerrar Sesión
-            </button>
+  return (
+    <div className="content-wrap text-center">
+      <h2>Mi Perfil</h2>
+      <div className="card">
+        <div className="avatar-circle">👤</div>
+        <h3>@{user.username}</h3>
+        <span style={{background: '#dfe6e9', padding: '5px 10px', borderRadius: '15px', fontSize: '12px'}}>
+          {user.role.toUpperCase()}
+        </span>
+        <div style={{marginTop: '30px'}}>
+          <button onClick={onLogout} className="btn btn-danger">Cerrar Sesión</button>
         </div>
-    )
+      </div>
+    </div>
+  )
+}
+
+// --- NAVEGACIÓN (Componente Interno) ---
+function Navigation({ role }) {
+  const location = useLocation();
+  const isActive = (path) => location.pathname === path ? 'nav-item active' : 'nav-item';
+
+  return (
+    <nav className="bottom-nav">
+      <Link to="/" className={isActive('/')}>🏠</Link>
+      
+      {/* Botón Central Flotante para Social o Vender */}
+      {role === 'vendedor' ? (
+        <Link to="/vender" className="nav-item-main">➕</Link>
+      ) : (
+        <Link to="/social" className="nav-item-main">📷</Link>
+      )}
+
+      {/* Si es vendedor, el social va a la derecha, si no, es el botón central */}
+      {role === 'vendedor' && <Link to="/social" className={isActive('/social')}>👥</Link>}
+      
+      <Link to="/perfil" className={isActive('/perfil')}>👤</Link>
+    </nav>
+  );
 }
 
 // --- APP PRINCIPAL ---
 function App() {
   const [user, setUser] = useState(null);
 
-  // Recuperar sesión si existe (opcional para el futuro, por ahora simple)
-  // const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
+  const handleLogin = (id, role, username) => setUser({ id, role, username });
+  const handleLogout = () => setUser(null);
 
-  const handleLogin = (id, role, username) => {
-    const userData = { id, role, username };
-    setUser(userData);
-    // localStorage.setItem('user', JSON.stringify(userData)); // Si quisieras persistencia
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-    // localStorage.removeItem('user');
-  };
-
-  if (!user) {
-    return <Login onLogin={handleLogin} />;
-  }
+  if (!user) return <Login onLogin={handleLogin} />;
 
   return (
     <BrowserRouter>
-      <div style={{paddingBottom: '70px'}}>
+      <div className="app-container">
         <Routes>
             <Route path="/" element={<Catalog userId={user.id} />} />
             <Route path="/social" element={<SocialFeed userId={user.id} />} />
             <Route path="/vender" element={user.role === 'vendedor' ? <Publish userId={user.id} /> : <Navigate to="/" />} />
             <Route path="/perfil" element={<Profile user={user} onLogout={handleLogout} />} />
         </Routes>
+        <Navigation role={user.role} />
       </div>
-
-      {/* Menú de Navegación Inferior */}
-      <nav style={{ 
-        position: 'fixed', bottom: 0, width: '100%', height: '60px', 
-        background: 'white', borderTop: '1px solid #ccc', 
-        display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-        zIndex: 1000
-      }}>
-        <Link to="/" style={{ textDecoration: 'none', fontSize: '24px' }}>🏠</Link>
-        <Link to="/social" style={{ textDecoration: 'none', fontSize: '24px' }}>👥</Link>
-        {user.role === 'vendedor' && (
-          <Link to="/vender" style={{ textDecoration: 'none', fontSize: '24px' }}>➕</Link>
-        )}
-        <Link to="/perfil" style={{ textDecoration: 'none', fontSize: '24px' }}>👤</Link>
-      </nav>
     </BrowserRouter>
   );
 }
-
-// Estilos
-const styles = {
-  container: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f0f2f5', fontFamily: 'Arial, sans-serif' },
-  card: { background: 'white', padding: '40px', borderRadius: '15px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', width: '100%', maxWidth: '350px', textAlign: 'center' },
-  title: { margin: '0', color: '#333', fontSize: '28px' },
-  subtitle: { margin: '10px 0 20px', color: '#666', fontSize: '16px', fontWeight: 'normal' },
-  form: { display: 'flex', flexDirection: 'column', gap: '15px' },
-  input: { padding: '12px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '16px', outline: 'none' },
-  selectContainer: { textAlign: 'left' },
-  label: { fontSize: '14px', color: '#555', marginBottom: '5px', display: 'block' },
-  select: { width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd' },
-  button: { padding: '12px', borderRadius: '8px', border: 'none', background: '#007bff', color: 'white', fontSize: '16px', cursor: 'pointer', fontWeight: 'bold' },
-  toggleText: { marginTop: '20px', fontSize: '14px', color: '#666' },
-  link: { color: '#007bff', cursor: 'pointer', fontWeight: 'bold' },
-  error: { background: '#ffebee', color: '#c62828', padding: '10px', borderRadius: '5px', marginBottom: '15px', fontSize: '14px' }
-};
 
 export default App;
