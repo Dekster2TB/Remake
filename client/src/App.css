@@ -1,17 +1,15 @@
 /* client/src/App.css */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
+/* Importamos Poppins (textos) y Merriweather (títulos elegantes) */
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&family=Poppins:wght@300;400;600&display=swap');
 
 :root {
-  --primary: #2d3436; /* Negro suave para REMAKE (más elegante/streetwear) */
-  --accent: #6c5ce7;  /* Violeta para detalles y notificaciones */
-  --bg-color: #f8f9fa;
-  --card-bg: #ffffff;
-  --text-dark: #2d3436;
-  --text-light: #636e72;
-  --danger: #ff7675;
-  --success: #00b894;
-  --shadow: 0 10px 20px rgba(0,0,0,0.05);
-  --radius: 16px;
+  --primary: #E85D36; /* Naranja Terracota del Figma */
+  --bg-color: #ffffff;
+  --input-bg: #F3EFEA; /* Beige suave de los inputs */
+  --text-dark: #2D2420; /* Marrón oscuro casi negro */
+  --text-light: #8b8b8b;
+  --radius: 30px; /* Bordes muy redondeados como en tus fotos */
+  --shadow: 0 4px 15px rgba(232, 93, 54, 0.15);
 }
 
 * {
@@ -21,61 +19,74 @@
 body {
   margin: 0;
   font-family: 'Poppins', sans-serif;
-  background-color: var(--bg-color);
+  background-color: #f9f9f9;
   color: var(--text-dark);
   -webkit-font-smoothing: antialiased;
 }
 
-/* --- Layout General --- */
+/* --- Títulos Elegantes (Como en el Figma) --- */
+h1, h2, h3 {
+  font-family: 'Merriweather', serif; /* Fuente con remates */
+  margin: 0 0 15px 0;
+  font-weight: 900;
+  color: var(--text-dark);
+}
+
+.brand-title {
+  font-size: 2.5rem;
+  color: var(--text-dark);
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* --- Layout --- */
 .app-container {
   max-width: 480px;
   margin: 0 auto;
   min-height: 100vh;
   background: white;
   position: relative;
-  box-shadow: 0 0 50px rgba(0,0,0,0.1);
+  box-shadow: 0 0 40px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
 }
 
 .content-wrap {
-  padding: 20px 20px 100px 20px;
+  padding: 25px 25px 100px 25px;
 }
 
-h1, h2, h3 {
-  margin: 0 0 15px 0;
-  font-weight: 600;
-}
-
-/* ESTILO DEL LOGO REMAKE */
-.brand-title {
-  font-weight: 800; /* Extra bold */
-  letter-spacing: -1px;
-  text-transform: uppercase;
-  background: -webkit-linear-gradient(45deg, #2d3436, #6c5ce7);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 5px;
-  font-size: 2.8rem;
+/* --- Logotipo circular (Estilo Figma) --- */
+.logo-circle {
+  width: 120px;
+  height: 120px;
+  background: var(--primary);
+  border-radius: 50%;
+  margin: 0 auto 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 50px;
+  color: white;
+  box-shadow: 0 10px 20px rgba(232, 93, 54, 0.3);
 }
 
 /* --- Tarjetas --- */
 .card {
-  background: var(--card-bg);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 20px;
+  background: white;
+  border-radius: 20px;
   margin-bottom: 20px;
-  border: 1px solid #f0f0f0;
-  transition: transform 0.2s;
+  /* En tu diseño nuevo, las cards son más planas o con sombra muy suave */
+  border: 1px solid #eee;
+  overflow: hidden;
 }
 
-.product-card, .post-card {
-  overflow: hidden;
-  padding: 0;
+.product-card {
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
 
 .product-card img, .post-card img {
   width: 100%;
-  height: 250px;
+  height: 220px;
   object-fit: cover;
 }
 
@@ -83,7 +94,7 @@ h1, h2, h3 {
   padding: 15px;
 }
 
-/* --- Formularios --- */
+/* --- Inputs (Estilo Beige Figma) --- */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -92,28 +103,28 @@ h1, h2, h3 {
 
 input, select, textarea {
   width: 100%;
-  padding: 15px;
-  border-radius: 12px;
-  border: 1px solid #e1e1e1;
-  background: #fdfdfd;
-  font-family: inherit;
-  font-size: 14px;
+  padding: 18px;
+  border-radius: 15px; /* Bordes redondeados */
+  border: none;
+  background: var(--input-bg); /* Fondo beige */
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  color: var(--text-dark);
   transition: 0.3s;
 }
 
 input:focus, textarea:focus {
   outline: none;
-  border-color: var(--accent);
-  background: white;
-  box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
+  background: #fff;
+  box-shadow: 0 0 0 2px var(--primary);
 }
 
-/* --- Botones --- */
+/* --- Botones (Naranja Figma) --- */
 .btn {
   width: 100%;
-  padding: 15px;
+  padding: 18px;
   border: none;
-  border-radius: 12px;
+  border-radius: 30px; /* Pill shape */
   font-weight: 600;
   cursor: pointer;
   font-size: 16px;
@@ -122,80 +133,99 @@ input:focus, textarea:focus {
   justify-content: center;
   align-items: center;
   gap: 8px;
+  margin-top: 10px;
 }
 
-.btn-primary { background: var(--primary); color: white; }
-.btn-accent { background: var(--accent); color: white; } /* Botón violeta */
-.btn-danger { background: var(--danger); color: white; }
-.btn-link { background: none; color: var(--accent); padding: 0; width: auto; display: inline; cursor: pointer; font-weight: bold;}
+.btn-primary { 
+  background: var(--primary); 
+  color: white; 
+  box-shadow: 0 5px 15px rgba(232, 93, 54, 0.4);
+}
 
-.btn:active { transform: scale(0.98); }
-.btn:disabled { opacity: 0.7; cursor: not-allowed; }
+.btn-accent { 
+  background: var(--text-dark); 
+  color: white; 
+} 
 
-/* --- Navegación --- */
+.btn-danger { 
+  background: #ff4757; 
+  color: white; 
+}
+
+.btn-link { 
+  background: none; 
+  color: var(--primary); 
+  padding: 0; 
+  width: auto; 
+  display: inline; 
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* --- Perfil (Estilo Figma) --- */
+.profile-header {
+  text-align: center;
+  padding: 20px 0;
+}
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 15px;
+  background: #eee;
+  border: 3px solid white;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* --- Navegación Inferior --- */
 .bottom-nav {
   position: fixed;
-  bottom: 20px;
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 90%;
-  max-width: 440px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  padding: 10px 25px;
-  border-radius: 30px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  width: 100%;
+  max-width: 480px;
+  background: white;
+  padding: 15px 30px;
+  border-top-left-radius: 25px;
+  border-top-right-radius: 25px;
+  box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
   display: flex;
   justify-content: space-between;
   align-items: center;
   z-index: 1000;
-  border: 1px solid rgba(255,255,255,0.5);
 }
 
 .nav-item {
   text-decoration: none;
-  font-size: 24px;
-  color: #b2bec3;
-  transition: 0.3s;
-  padding: 10px;
+  font-size: 26px;
+  color: #ccc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-item span {
+  font-size: 10px;
+  font-weight: 500;
 }
 
 .nav-item.active {
-  color: var(--accent);
-  transform: translateY(-2px);
-}
-
-.nav-item-main {
-  background: var(--primary);
-  color: white;
-  width: 55px;
-  height: 55px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 5px 15px rgba(45, 52, 54, 0.3);
-  margin-top: -35px;
-  font-size: 24px;
-  text-decoration: none;
+  color: var(--primary);
 }
 
 /* --- Utilidades --- */
 .text-center { textAlign: center; }
 .text-muted { color: var(--text-light); font-size: 0.9em; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-.avatar-circle {
-  width: 80px; height: 80px; background: #dfe6e9;
-  border-radius: 50%; margin: 0 auto 15px;
-  display: flex; alignItems: center; justifyContent: center;
-  font-size: 30px;
-}
 .file-upload-box {
   border: 2px dashed #dcdde1;
   padding: 30px;
-  border-radius: var(--radius);
+  border-radius: 15px;
   text-align: center;
   cursor: pointer;
+  background: var(--input-bg);
   color: var(--text-light);
 }
-.file-upload-box:hover { background: #f1f2f6; border-color: var(--accent); }
