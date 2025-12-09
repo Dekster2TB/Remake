@@ -3,29 +3,30 @@ import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate } from 'react
 import axios from 'axios';
 import './App.css'; 
 
-// --- 1. PANTALLA DE LOGIN / REGISTRO MEJORADA ---
+// const API_URL = 'http://localhost:5000/api'; // LOCAL
+const API_URL = 'https://remake-6kfb.onrender.com/api'; // RENDER (Producción)
+
+// --- 1. PANTALLA DE LOGIN / REGISTRO ---
 function Login({ onLogin }) {
-  const [isLogin, setIsLogin] = useState(true); // true = Login, false = Registro
+  const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ email: '', password: '', username: '', role: 'comprador' });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
-    // Decide a qué ruta llamar según el modo
-    const endpoint = isLogin 
-      ? 'https://remake-6kfb.onrender.com/api/login' 
-      : 'https://remake-6kfb.onrender.com/api/register';
+    setLoading(true);
+    const endpoint = isLogin ? `${API_URL}/login` : `${API_URL}/register`;
     
     try {
       const res = await axios.post(endpoint, formData);
-      // Si es login, el backend nos devuelve el rol. Si es registro, usamos el del formulario.
       const userRole = res.data.role || formData.role; 
-      onLogin(res.data.userId, userRole);
+      onLogin(res.data.userId, userRole, res.data.username);
     } catch (err) {
-      // Muestra el error que viene del servidor (ej: "Contraseña incorrecta")
       setError(err.response?.data?.error || 'Error al conectar con el servidor');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -38,32 +39,12 @@ function Login({ onLogin }) {
         {error && <div style={styles.error}>{error}</div>}
 
         <form onSubmit={handleSubmit} style={styles.form}>
-          {/* Campo de Usuario (Solo visible en Registro) */}
           {!isLogin && (
-            <input 
-              style={styles.input}
-              placeholder="Nombre de usuario" 
-              onChange={e => setFormData({...formData, username: e.target.value})} 
-              required 
-            />
+            <input style={styles.input} placeholder="Nombre de usuario" onChange={e => setFormData({...formData, username: e.target.value})} required />
           )}
-
-          <input 
-            style={styles.input}
-            placeholder="Correo electrónico" 
-            type="email" 
-            onChange={e => setFormData({...formData, email: e.target.value})} 
-            required 
-          />
-          <input 
-            style={styles.input}
-            placeholder="Contraseña" 
-            type="password" 
-            onChange={e => setFormData({...formData, password: e.target.value})} 
-            required 
-          />
+          <input style={styles.input} placeholder="Correo electrónico" type="email" onChange={e => setFormData({...formData, email: e.target.value})} required />
+          <input style={styles.input} placeholder="Contraseña" type="password" onChange={e => setFormData({...formData, password: e.target.value})} required />
           
-          {/* Selector de Rol (Solo visible en Registro) */}
           {!isLogin && (
             <div style={styles.selectContainer}>
               <label style={styles.label}>Quiero usar la app para:</label>
@@ -74,8 +55,8 @@ function Login({ onLogin }) {
             </div>
           )}
 
-          <button type="submit" style={styles.button}>
-            {isLogin ? 'Entrar' : 'Registrarme'}
+          <button type="submit" style={styles.button} disabled={loading}>
+            {loading ? 'Cargando...' : (isLogin ? 'Entrar' : 'Registrarme')}
           </button>
         </form>
 
@@ -95,12 +76,12 @@ function Catalog({ userId }) {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    axios.get('https://remake-6kfb.onrender.com/api/products').then(res => setProducts(res.data));
+    axios.get(`${API_URL}/products`).then(res => setProducts(res.data));
   }, []);
 
   const handleBuy = async (productId) => {
-    await axios.post('https://remake-6kfb.onrender.com/api/purchase-intent', { productId, userId });
-    alert("✅ ¡Gracias! Registramos tu interés. Te contactaremos cuando esté disponible.");
+    await axios.post(`${API_URL}/purchase-intent`, { productId, userId });
+    alert("✅ ¡Gracias! Registramos tu interés.");
   };
 
   return (
@@ -125,54 +106,123 @@ function Catalog({ userId }) {
   );
 }
 
-// --- 3. PUBLICAR PRENDA (Vendedores) ---
+// --- 3. PUBLICAR PRENDA (CON FOTO) ---
 function Publish({ userId }) {
-  const [form, setForm] = useState({ title: '', price: '', imageUrl: '' });
+  const [form, setForm] = useState({ title: '', price: '', description: '' });
+  const [imageFile, setImageFile] = useState(null); // Guardamos el archivo
+  const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await axios.post('https://remake-6kfb.onrender.com/api/products', { ...form, seller: userId });
-    alert("¡Prenda publicada con éxito!");
-    navigate('/'); 
+    if (!imageFile) return alert("¡Debes subir una foto!");
+    
+    setUploading(true);
+    try {
+      // 1. Subir imagen primero
+      const formData = new FormData();
+      formData.append('image', imageFile);
+      
+      const uploadRes = await axios.post(`${API_URL}/upload`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      const imageUrl = uploadRes.data.url;
+
+      // 2. Guardar producto con la URL
+      await axios.post(`${API_URL}/products`, { 
+        ...form, 
+        imageUrl, 
+        seller: userId 
+      });
+      
+      alert("¡Prenda publicada con éxito!");
+      navigate('/'); 
+    } catch (error) {
+      console.error(error);
+      alert("Error al publicar");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
     <div style={{ padding: '20px' }}>
       <h2>Vender Prenda</h2>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <input placeholder="Título (ej: Polera Vintage)" onChange={e => setForm({...form, title: e.target.value})} required style={{padding: '10px'}}/>
-        <input placeholder="Precio ($)" type="number" onChange={e => setForm({...form, price: e.target.value})} required style={{padding: '10px'}}/>
-        <input placeholder="URL de la Foto (link de google)" onChange={e => setForm({...form, imageUrl: e.target.value})} required style={{padding: '10px'}}/>
-        <button type="submit" style={{padding: '15px', background: 'green', color: 'white'}}>PUBLICAR</button>
+        <input placeholder="Título" onChange={e => setForm({...form, title: e.target.value})} required style={styles.input}/>
+        <input placeholder="Precio ($)" type="number" onChange={e => setForm({...form, price: e.target.value})} required style={styles.input}/>
+        
+        {/* INPUT DE ARCHIVO */}
+        <div style={{border: '2px dashed #ccc', padding: '20px', textAlign: 'center'}}>
+          <label style={{cursor: 'pointer', display: 'block'}}>
+            {imageFile ? `📸 ${imageFile.name}` : "Toca para subir foto"}
+            <input 
+              type="file" 
+              accept="image/*" 
+              style={{display: 'none'}} 
+              onChange={e => setImageFile(e.target.files[0])}
+            />
+          </label>
+        </div>
+
+        <button type="submit" style={{...styles.button, background: 'green'}} disabled={uploading}>
+          {uploading ? 'Subiendo foto...' : 'PUBLICAR'}
+        </button>
       </form>
     </div>
   );
 }
 
-// --- 4. MURO SOCIAL ---
+// --- 4. MURO SOCIAL (CON FOTO OPCIONAL) ---
 function SocialFeed({ userId }) {
   const [posts, setPosts] = useState([]);
-  const [newPost, setNewPost] = useState("");
+  const [newPostText, setNewPostText] = useState("");
+  const [postImage, setPostImage] = useState(null);
+  const [loadingPost, setLoadingPost] = useState(false);
 
   useEffect(() => {
     loadPosts();
   }, []);
 
   const loadPosts = () => {
-    axios.get('https://remake-6kfb.onrender.com/api/posts').then(res => setPosts(res.data));
+    axios.get(`${API_URL}/posts`).then(res => setPosts(res.data));
   };
 
-  const handlePost = async (e) => {
-    e.preventDefault();
-    if(!newPost) return;
-    await axios.post('https://remake-6kfb.onrender.com/api/posts', { text: newPost, author: userId });
-    setNewPost("");
-    loadPosts(); 
+  const handlePost = async () => {
+    if (!newPostText) return;
+    setLoadingPost(true);
+
+    try {
+      let imageUrl = null;
+      // Si seleccionó foto, la subimos
+      if (postImage) {
+        const formData = new FormData();
+        formData.append('image', postImage);
+        const uploadRes = await axios.post(`${API_URL}/upload`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        imageUrl = uploadRes.data.url;
+      }
+
+      // Creamos el post
+      await axios.post(`${API_URL}/posts`, { 
+        text: newPostText, 
+        author: userId,
+        imageUrl: imageUrl // Puede ser null o la url
+      });
+
+      setNewPostText("");
+      setPostImage(null);
+      loadPosts(); 
+    } catch (error) {
+      alert("Error al publicar");
+    } finally {
+      setLoadingPost(false);
+    }
   };
 
   const handleLike = async (postId) => {
-    await axios.put(`https://remake-6kfb.onrender.com/api/posts/${postId}/like`);
+    await axios.put(`${API_URL}/posts/${postId}/like`);
     loadPosts(); 
   };
 
@@ -180,21 +230,40 @@ function SocialFeed({ userId }) {
     <div style={{ padding: '10px 10px 80px 10px' }}>
       <h2>Comunidad</h2>
       
-      <div style={{ marginBottom: '20px', padding: '10px', background: '#f9f9f9', borderRadius: '10px' }}>
+      {/* Crear Publicación */}
+      <div style={{ marginBottom: '20px', padding: '15px', background: '#f9f9f9', borderRadius: '10px', border: '1px solid #eee' }}>
         <textarea 
           placeholder="¿Qué estás pensando?" 
-          value={newPost}
-          onChange={e => setNewPost(e.target.value)}
-          style={{ width: '100%', height: '60px', padding: '5px', marginBottom: '5px' }}
+          value={newPostText}
+          onChange={e => setNewPostText(e.target.value)}
+          style={{ width: '100%', height: '60px', padding: '10px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '5px' }}
         />
-        <button onClick={handlePost} style={{ background: 'black', color: 'white', padding: '5px 15px', border: 'none' }}>Publicar</button>
+        
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+           {/* Botón Foto Pequeño */}
+           <label style={{cursor: 'pointer', color: '#007bff', fontSize: '14px'}}>
+              {postImage ? '✅ Foto lista' : '📷 Agregar foto'}
+              <input type="file" accept="image/*" style={{display: 'none'}} onChange={e => setPostImage(e.target.files[0])}/>
+           </label>
+
+           <button onClick={handlePost} disabled={loadingPost} style={{ background: 'black', color: 'white', padding: '8px 20px', border: 'none', borderRadius: '20px' }}>
+             {loadingPost ? '...' : 'Publicar'}
+           </button>
+        </div>
       </div>
 
+      {/* Lista de Posts */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
         {posts.map(post => (
           <div key={post._id} style={{ border: '1px solid #eee', padding: '15px', borderRadius: '10px', background: 'white' }}>
             <div style={{fontWeight: 'bold', marginBottom: '5px'}}>@{post.author?.username || 'Usuario'}</div>
             <p style={{ margin: '5px 0' }}>{post.text}</p>
+            
+            {/* Si tiene imagen, la mostramos */}
+            {post.imageUrl && (
+                <img src={post.imageUrl} alt="post" style={{width: '100%', borderRadius: '10px', marginTop: '10px', maxHeight: '300px', objectFit: 'cover'}}/>
+            )}
+
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#888', marginTop: '10px' }}>
               <button onClick={() => handleLike(post._id)} style={{ background: 'none', border: '1px solid #ddd', borderRadius: '20px', padding: '5px 10px', cursor: 'pointer' }}>
                 ❤️ {post.likes}
@@ -208,12 +277,40 @@ function SocialFeed({ userId }) {
   );
 }
 
-// --- 5. APP PRINCIPAL ---
+// --- 5. COMPONENTE DE PERFIL Y LOGOUT ---
+function Profile({ user, onLogout }) {
+    return (
+        <div style={{padding: '20px', textAlign: 'center'}}>
+            <h2>Mi Perfil</h2>
+            <div style={{width: '80px', height: '80px', background: '#ddd', borderRadius: '50%', margin: '0 auto 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '30px'}}>
+                👤
+            </div>
+            <h3>@{user.username}</h3>
+            <p>Rol: {user.role.toUpperCase()}</p>
+            <br/>
+            <button onClick={onLogout} style={{background: 'red', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '5px', fontSize: '16px'}}>
+                Cerrar Sesión
+            </button>
+        </div>
+    )
+}
+
+// --- APP PRINCIPAL ---
 function App() {
   const [user, setUser] = useState(null);
 
-  const handleLogin = (id, role) => {
-    setUser({ id, role });
+  // Recuperar sesión si existe (opcional para el futuro, por ahora simple)
+  // const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
+
+  const handleLogin = (id, role, username) => {
+    const userData = { id, role, username };
+    setUser(userData);
+    // localStorage.setItem('user', JSON.stringify(userData)); // Si quisieras persistencia
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    // localStorage.removeItem('user');
   };
 
   if (!user) {
@@ -222,12 +319,16 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Catalog userId={user.id} />} />
-        <Route path="/social" element={<SocialFeed userId={user.id} />} />
-        <Route path="/vender" element={user.role === 'vendedor' ? <Publish userId={user.id} /> : <Navigate to="/" />} />
-      </Routes>
+      <div style={{paddingBottom: '70px'}}>
+        <Routes>
+            <Route path="/" element={<Catalog userId={user.id} />} />
+            <Route path="/social" element={<SocialFeed userId={user.id} />} />
+            <Route path="/vender" element={user.role === 'vendedor' ? <Publish userId={user.id} /> : <Navigate to="/" />} />
+            <Route path="/perfil" element={<Profile user={user} onLogout={handleLogout} />} />
+        </Routes>
+      </div>
 
+      {/* Menú de Navegación Inferior */}
       <nav style={{ 
         position: 'fixed', bottom: 0, width: '100%', height: '60px', 
         background: 'white', borderTop: '1px solid #ccc', 
@@ -239,12 +340,13 @@ function App() {
         {user.role === 'vendedor' && (
           <Link to="/vender" style={{ textDecoration: 'none', fontSize: '24px' }}>➕</Link>
         )}
+        <Link to="/perfil" style={{ textDecoration: 'none', fontSize: '24px' }}>👤</Link>
       </nav>
     </BrowserRouter>
   );
 }
 
-// --- ESTILOS VISUALES (CSS en JS) ---
+// Estilos
 const styles = {
   container: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f0f2f5', fontFamily: 'Arial, sans-serif' },
   card: { background: 'white', padding: '40px', borderRadius: '15px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', width: '100%', maxWidth: '350px', textAlign: 'center' },
