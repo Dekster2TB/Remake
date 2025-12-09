@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import './App.css'; // Importamos el nuevo diseño
+import './App.css'; 
 
-// CONFIGURACIÓN API (Ajustar según entorno)
-// const API_URL = 'http://localhost:5000/api'; 
+// URL DE LA API (Asegúrate que sea la correcta de Render)
 const API_URL = 'https://remake-6kfb.onrender.com/api'; 
 
-// --- 1. LOGIN / REGISTRO ---
+// --- 1. PANTALLA DE BIENVENIDA (Login/Registro) ---
 function Login({ onLogin }) {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ email: '', password: '', username: '', role: 'comprador' });
@@ -25,7 +24,7 @@ function Login({ onLogin }) {
       const userRole = res.data.role || formData.role; 
       onLogin(res.data.userId, userRole, res.data.username);
     } catch (err) {
-      setError(err.response?.data?.error || 'Error de conexión');
+      setError(err.response?.data?.error || 'No pudimos conectar con el servidor');
     } finally {
       setLoading(false);
     }
@@ -33,38 +32,42 @@ function Login({ onLogin }) {
 
   return (
     <div className="app-container" style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-      <div className="card" style={{width: '90%'}}>
-        <div className="text-center">
-          <h1 style={{color: 'var(--primary)', fontSize: '2.5rem'}}>CycloArt</h1>
-          <p className="text-muted">{isLogin ? 'Bienvenido de nuevo' : 'Únete al movimiento'}</p>
+      <div className="card" style={{width: '90%', border: 'none', boxShadow: 'none', background: 'transparent'}}>
+        <div className="text-center" style={{marginBottom: '40px'}}>
+          <h1 className="brand-title">REMAKE</h1>
+          <p className="text-muted" style={{fontSize: '1.1rem'}}>
+            {isLogin ? 'Reinventa tu estilo.' : 'Únete a la revolución de la moda circular.'}
+          </p>
         </div>
         
-        {error && <div style={{background: '#ff7675', color: 'white', padding: '10px', borderRadius: '8px', marginBottom: '15px'}}>{error}</div>}
+        <div className="card" style={{padding: '30px'}}>
+            {error && <div style={{background: '#ff7675', color: 'white', padding: '10px', borderRadius: '8px', marginBottom: '15px'}}>{error}</div>}
 
-        <form onSubmit={handleSubmit} className="form-group">
-          {!isLogin && (
-            <input className="input-field" placeholder="Nombre de usuario" onChange={e => setFormData({...formData, username: e.target.value})} required />
-          )}
-          <input placeholder="Correo electrónico" type="email" onChange={e => setFormData({...formData, email: e.target.value})} required />
-          <input placeholder="Contraseña" type="password" onChange={e => setFormData({...formData, password: e.target.value})} required />
-          
-          {!isLogin && (
-            <select onChange={e => setFormData({...formData, role: e.target.value})}>
-              <option value="comprador">Quiero Comprar</option>
-              <option value="vendedor">Quiero Vender</option>
-            </select>
-          )}
+            <form onSubmit={handleSubmit} className="form-group">
+            {!isLogin && (
+                <input placeholder="Nombre de usuario" onChange={e => setFormData({...formData, username: e.target.value})} required />
+            )}
+            <input placeholder="Correo electrónico" type="email" onChange={e => setFormData({...formData, email: e.target.value})} required />
+            <input placeholder="Contraseña" type="password" onChange={e => setFormData({...formData, password: e.target.value})} required />
+            
+            {!isLogin && (
+                <select onChange={e => setFormData({...formData, role: e.target.value})}>
+                <option value="comprador">Quiero Comprar</option>
+                <option value="vendedor">Quiero Vender</option>
+                </select>
+            )}
 
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Procesando...' : (isLogin ? 'Iniciar Sesión' : 'Crear Cuenta')}
-          </button>
-        </form>
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading ? 'Cargando...' : (isLogin ? 'Iniciar Sesión' : 'Crear Cuenta')}
+            </button>
+            </form>
+        </div>
 
-        <div className="text-center" style={{marginTop: '20px'}}>
+        <div className="text-center" style={{marginTop: '30px'}}>
           <p className="text-muted">
-            {isLogin ? "¿Nuevo aquí? " : "¿Ya tienes cuenta? "}
+            {isLogin ? "¿Aún no tienes cuenta? " : "¿Ya tienes cuenta? "}
             <button onClick={() => setIsLogin(!isLogin)} className="btn-link">
-              {isLogin ? "Regístrate" : "Ingresa"}
+              {isLogin ? "Regístrate aquí" : "Ingresa aquí"}
             </button>
           </p>
         </div>
@@ -73,7 +76,7 @@ function Login({ onLogin }) {
   );
 }
 
-// --- 2. CATÁLOGO ---
+// --- 2. CATÁLOGO DE PRODUCTOS ---
 function Catalog({ userId }) {
   const [products, setProducts] = useState([]);
 
@@ -83,20 +86,24 @@ function Catalog({ userId }) {
 
   const handleBuy = async (productId) => {
     await axios.post(`${API_URL}/purchase-intent`, { productId, userId });
-    alert("✨ ¡Excelente elección! Hemos notificado al vendedor.");
+    alert("✨ ¡Interés registrado! El vendedor será notificado.");
   };
 
   return (
     <div className="content-wrap">
-      <h2>Descubrir</h2>
+      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+        <h2>Descubrir</h2>
+        <span style={{fontSize: '0.9rem', background: '#e1e1e1', padding: '5px 10px', borderRadius: '20px'}}>Todo</span>
+      </div>
+      
       <div className="grid-2">
         {products.map(p => (
           <div key={p._id} className="card product-card">
             <img src={p.imageUrl} alt={p.title} />
             <div className="card-content">
-              <h4>{p.title}</h4>
-              <p style={{fontWeight: 'bold', color: 'var(--primary)'}}>${p.price}</p>
-              <button onClick={() => handleBuy(p._id)} className="btn btn-primary" style={{padding: '8px', fontSize: '14px'}}>
+              <h4 style={{fontSize: '1rem', marginBottom: '5px'}}>{p.title}</h4>
+              <p style={{fontWeight: 'bold', fontSize: '1.1rem'}}>${p.price}</p>
+              <button onClick={() => handleBuy(p._id)} className="btn btn-accent" style={{padding: '8px', fontSize: '14px', marginTop: '10px'}}>
                 Lo quiero
               </button>
             </div>
@@ -107,7 +114,7 @@ function Catalog({ userId }) {
   );
 }
 
-// --- 3. PUBLICAR PRENDA ---
+// --- 3. PUBLICAR PRENDA (Vendedores) ---
 function Publish({ userId }) {
   const [form, setForm] = useState({ title: '', price: '' });
   const [imageFile, setImageFile] = useState(null);
@@ -116,7 +123,7 @@ function Publish({ userId }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!imageFile) return alert("Por favor sube una foto de la prenda");
+    if (!imageFile) return alert("¡La foto es obligatoria!");
     
     setUploading(true);
     try {
@@ -131,10 +138,9 @@ function Publish({ userId }) {
         ...form, imageUrl: uploadRes.data.url, seller: userId 
       });
       
-      alert("¡Publicado exitosamente!");
+      alert("¡Publicado en REMAKE!");
       navigate('/'); 
     } catch (error) {
-      console.error(error);
       alert("Error al subir");
     } finally {
       setUploading(false);
@@ -143,17 +149,19 @@ function Publish({ userId }) {
 
   return (
     <div className="content-wrap">
-      <h2>Vender Prenda</h2>
+      <h2>Vender en REMAKE</h2>
+      <p className="text-muted" style={{marginBottom: '20px'}}>Dale una segunda vida a esa prenda.</p>
+      
       <form onSubmit={handleSubmit} className="form-group card">
         <label className="file-upload-box">
           {imageFile ? 
-            <span style={{color: 'var(--success)'}}>📸 {imageFile.name}</span> : 
-            <span>📂 Toca para subir foto</span>
+            <span style={{color: 'var(--success)', fontWeight: 'bold'}}>📸 {imageFile.name}</span> : 
+            <span>📂 Toca para subir foto de la prenda</span>
           }
           <input type="file" accept="image/*" style={{display: 'none'}} onChange={e => setImageFile(e.target.files[0])}/>
         </label>
 
-        <input placeholder="Nombre de la prenda" onChange={e => setForm({...form, title: e.target.value})} required />
+        <input placeholder="¿Qué estás vendiendo?" onChange={e => setForm({...form, title: e.target.value})} required />
         <input placeholder="Precio ($)" type="number" onChange={e => setForm({...form, price: e.target.value})} required />
         
         <button type="submit" className="btn btn-primary" disabled={uploading}>
@@ -164,7 +172,7 @@ function Publish({ userId }) {
   );
 }
 
-// --- 4. COMUNIDAD ---
+// --- 4. COMUNIDAD (Social Feed) ---
 function SocialFeed({ userId }) {
   const [posts, setPosts] = useState([]);
   const [newPostText, setNewPostText] = useState("");
@@ -200,37 +208,41 @@ function SocialFeed({ userId }) {
     <div className="content-wrap">
       <h2>Comunidad</h2>
       
-      {/* Crear Post */}
-      <div className="card">
+      {/* Caja para crear post */}
+      <div className="card" style={{borderLeft: '4px solid var(--accent)'}}>
         <textarea 
-          placeholder="Comparte tu estilo..." 
+          placeholder="Comparte tu outfit, ideas o preguntas..." 
           value={newPostText}
           onChange={e => setNewPostText(e.target.value)}
           rows="2"
+          style={{border: 'none', padding: '0', resize: 'none'}}
         />
-        <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '10px'}}>
-           <label style={{cursor: 'pointer', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '5px'}}>
+        <div style={{height: '1px', background: '#eee', margin: '10px 0'}}></div>
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+           <label style={{cursor: 'pointer', color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.9rem'}}>
               <span>📷</span>
-              {postImage ? 'Foto lista' : 'Agregar foto'}
+              {postImage ? 'Foto lista' : 'Foto'}
               <input type="file" accept="image/*" style={{display: 'none'}} onChange={e => setPostImage(e.target.files[0])}/>
            </label>
-           <button onClick={handlePost} className="btn btn-primary" style={{width: 'auto', padding: '8px 20px'}}>
+           <button onClick={handlePost} className="btn btn-primary" style={{width: 'auto', padding: '8px 20px', borderRadius: '20px'}}>
              {loading ? '...' : 'Publicar'}
            </button>
         </div>
       </div>
 
-      {/* Feed */}
+      {/* Lista de Posts */}
       {posts.map(post => (
         <div key={post._id} className="card post-card">
           <div className="card-content" style={{paddingBottom: 0}}>
-            <strong>@{post.author?.username || 'Usuario'}</strong>
-            <p style={{marginTop: '5px'}}>{post.text}</p>
+            <strong style={{color: 'var(--primary)'}}>@{post.author?.username || 'Usuario'}</strong>
+            <p style={{marginTop: '5px', fontSize: '0.95rem'}}>{post.text}</p>
           </div>
           {post.imageUrl && <img src={post.imageUrl} alt="post" />}
-          <div className="card-content" style={{display: 'flex', gap: '15px'}}>
-            <button onClick={() => handleLike(post._id)} className="btn-link">❤️ {post.likes}</button>
-            <span className="text-muted">{new Date(post.createdAt).toLocaleDateString()}</span>
+          <div className="card-content" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+            <button onClick={() => handleLike(post._id)} className="btn-link" style={{fontSize: '1.2rem'}}>
+              ❤️ {post.likes}
+            </button>
+            <span className="text-muted" style={{fontSize: '0.8rem'}}>{new Date(post.createdAt).toLocaleDateString()}</span>
           </div>
         </div>
       ))}
@@ -238,18 +250,21 @@ function SocialFeed({ userId }) {
   );
 }
 
-// --- 5. PERFIL ---
+// --- 5. PERFIL DE USUARIO ---
 function Profile({ user, onLogout }) {
   return (
     <div className="content-wrap text-center">
       <h2>Mi Perfil</h2>
       <div className="card">
-        <div className="avatar-circle">👤</div>
-        <h3>@{user.username}</h3>
-        <span style={{background: '#dfe6e9', padding: '5px 10px', borderRadius: '15px', fontSize: '12px'}}>
+        <div className="avatar-circle" style={{background: 'var(--primary)', color: 'white'}}>
+            {user.username.charAt(0).toUpperCase()}
+        </div>
+        <h3 style={{marginBottom: '5px'}}>@{user.username}</h3>
+        <span style={{background: '#dfe6e9', padding: '5px 15px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold'}}>
           {user.role.toUpperCase()}
         </span>
-        <div style={{marginTop: '30px'}}>
+        
+        <div style={{marginTop: '40px', borderTop: '1px solid #eee', paddingTop: '20px'}}>
           <button onClick={onLogout} className="btn btn-danger">Cerrar Sesión</button>
         </div>
       </div>
@@ -257,7 +272,7 @@ function Profile({ user, onLogout }) {
   )
 }
 
-// --- NAVEGACIÓN (Componente Interno) ---
+// --- NAVEGACIÓN INFERIOR ---
 function Navigation({ role }) {
   const location = useLocation();
   const isActive = (path) => location.pathname === path ? 'nav-item active' : 'nav-item';
@@ -266,14 +281,14 @@ function Navigation({ role }) {
     <nav className="bottom-nav">
       <Link to="/" className={isActive('/')}>🏠</Link>
       
-      {/* Botón Central Flotante para Social o Vender */}
+      {/* El botón central cambia según el rol */}
       {role === 'vendedor' ? (
         <Link to="/vender" className="nav-item-main">➕</Link>
       ) : (
         <Link to="/social" className="nav-item-main">📷</Link>
       )}
 
-      {/* Si es vendedor, el social va a la derecha, si no, es el botón central */}
+      {/* Si es vendedor, el social va a un lado */}
       {role === 'vendedor' && <Link to="/social" className={isActive('/social')}>👥</Link>}
       
       <Link to="/perfil" className={isActive('/perfil')}>👤</Link>

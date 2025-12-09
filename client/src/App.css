@@ -1,9 +1,9 @@
 /* client/src/App.css */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
 
 :root {
-  --primary: #6c5ce7; /* Un violeta moderno tipo "CycloArt" */
-  --secondary: #a29bfe;
+  --primary: #2d3436; /* Negro suave para REMAKE (más elegante/streetwear) */
+  --accent: #6c5ce7;  /* Violeta para detalles y notificaciones */
   --bg-color: #f8f9fa;
   --card-bg: #ffffff;
   --text-dark: #2d3436;
@@ -28,7 +28,7 @@ body {
 
 /* --- Layout General --- */
 .app-container {
-  max-width: 480px; /* Ancho típico de celular */
+  max-width: 480px;
   margin: 0 auto;
   min-height: 100vh;
   background: white;
@@ -37,7 +37,7 @@ body {
 }
 
 .content-wrap {
-  padding: 20px 20px 100px 20px; /* Espacio abajo para el menú */
+  padding: 20px 20px 100px 20px;
 }
 
 h1, h2, h3 {
@@ -45,7 +45,19 @@ h1, h2, h3 {
   font-weight: 600;
 }
 
-/* --- Tarjetas (Login, Productos, Posts) --- */
+/* ESTILO DEL LOGO REMAKE */
+.brand-title {
+  font-weight: 800; /* Extra bold */
+  letter-spacing: -1px;
+  text-transform: uppercase;
+  background: -webkit-linear-gradient(45deg, #2d3436, #6c5ce7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 5px;
+  font-size: 2.8rem;
+}
+
+/* --- Tarjetas --- */
 .card {
   background: var(--card-bg);
   border-radius: var(--radius);
@@ -71,7 +83,7 @@ h1, h2, h3 {
   padding: 15px;
 }
 
-/* --- Formularios e Inputs --- */
+/* --- Formularios --- */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -91,7 +103,7 @@ input, select, textarea {
 
 input:focus, textarea:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: var(--accent);
   background: white;
   box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
 }
@@ -112,16 +124,15 @@ input:focus, textarea:focus {
   gap: 8px;
 }
 
-.btn-primary { background: var(--text-dark); color: white; }
-.btn-success { background: var(--success); color: white; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-accent { background: var(--accent); color: white; } /* Botón violeta */
 .btn-danger { background: var(--danger); color: white; }
-.btn-outline { background: transparent; border: 2px solid var(--text-dark); color: var(--text-dark); }
-.btn-link { background: none; color: var(--primary); padding: 0; width: auto; display: inline; }
+.btn-link { background: none; color: var(--accent); padding: 0; width: auto; display: inline; cursor: pointer; font-weight: bold;}
 
 .btn:active { transform: scale(0.98); }
 .btn:disabled { opacity: 0.7; cursor: not-allowed; }
 
-/* --- Navegación Inferior (App Dock) --- */
+/* --- Navegación --- */
 .bottom-nav {
   position: fixed;
   bottom: 20px;
@@ -129,11 +140,11 @@ input:focus, textarea:focus {
   transform: translateX(-50%);
   width: 90%;
   max-width: 440px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  padding: 15px 25px;
+  padding: 10px 25px;
   border-radius: 30px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -146,26 +157,27 @@ input:focus, textarea:focus {
   font-size: 24px;
   color: #b2bec3;
   transition: 0.3s;
-  position: relative;
+  padding: 10px;
 }
 
 .nav-item.active {
-  color: var(--primary);
+  color: var(--accent);
   transform: translateY(-2px);
 }
 
-/* Botón flotante central */
 .nav-item-main {
   background: var(--primary);
   color: white;
-  width: 50px;
-  height: 50px;
+  width: 55px;
+  height: 55px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
-  margin-top: -30px; /* Efecto flotante */
+  box-shadow: 0 5px 15px rgba(45, 52, 54, 0.3);
+  margin-top: -35px;
+  font-size: 24px;
+  text-decoration: none;
 }
 
 /* --- Utilidades --- */
@@ -186,4 +198,4 @@ input:focus, textarea:focus {
   cursor: pointer;
   color: var(--text-light);
 }
-.file-upload-box:hover { background: #f1f2f6; border-color: var(--primary); }
+.file-upload-box:hover { background: #f1f2f6; border-color: var(--accent); }
